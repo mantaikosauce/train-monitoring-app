@@ -407,8 +407,9 @@ def view_for(points: pd.DataFrame | None, duration_ms: int = 900) -> pdk.ViewSta
         span = max(lat1 - lat0, (lon1 - lon0) * 0.98, 0.01)
         zoom = max(9.5, min(13.5, 11.3 - 2.2 * (span / 0.25 - 1)))   # ~island span 0.25° -> 11.3
         v = dict(latitude=(lat0 + lat1) / 2, longitude=(lon0 + lon1) / 2, zoom=zoom)
-    return pdk.ViewState(**v, pitch=0, bearing=0, transition_duration=duration_ms,
-                         transition_interpolator="FlyToInterpolator")
+    # transition_duration animates between view states in deck.gl; an interpolator given as a
+    # plain string is not understood by the JSON renderer and can blank the whole map, so none is set.
+    return pdk.ViewState(**v, pitch=0, bearing=0, transition_duration=duration_ms)
 
 
 def affected_lines(ev: pd.DataFrame) -> list[str]:

@@ -79,14 +79,8 @@ st.set_page_config(page_title="Nebula Wayside", page_icon="🚆", layout="wide")
 
 
 def _resolve_theme() -> str:
-    """Auto follows the viewer's system setting (day or night); the hero toggle overrides it."""
-    pick = st.session_state.get("theme_persist", "Auto")
-    if pick in ("Day", "Night"):
-        return "light" if pick == "Day" else "dark"
-    try:
-        return "light" if st.context.theme.type == "light" else "dark"
-    except Exception:
-        return "dark"
+    """The console is light only: one palette, validated for colour-vision deficiency."""
+    return "light"
 
 
 _theme.set_theme(_resolve_theme())
@@ -168,7 +162,7 @@ def view_toggle() -> None:
     """View and theme, side by side, on every page. Widget state is dropped by Streamlit
     when a page does not draw the widget, so the chosen values are copied into plain
     session keys that every page reads."""
-    c1, c2, c3 = st.columns([1, 1, 2])
+    c1, c2 = st.columns([1, 3])
     with c1:
         st.segmented_control("View", ["Operator", "Engineer"],
                              default=st.session_state.get("view_mode_persist", "Operator"),
@@ -176,14 +170,8 @@ def view_toggle() -> None:
                              on_change=_persist, args=("view_mode", "view_mode_persist"),
                              help="Operator: actions and plain words. Engineer: every chart, table and model detail.")
     with c2:
-        st.segmented_control("Theme", ["Auto", "Day", "Night"],
-                             default=st.session_state.get("theme_persist", "Auto"),
-                             key="theme_pick", label_visibility="collapsed",
-                             on_change=_persist, args=("theme_pick", "theme_persist"),
-                             help="Auto follows your system's day/night setting.")
-    with c3:
         st.caption("Operator view: actions and plain words. Engineer view: every chart and model detail. "
-                   "Theme follows your system unless you pick one. Both settings stay as you move between pages.")
+                   "The setting stays as you move between pages.")
 
 
 def drift_chip(res: dict, key: str) -> None:
@@ -389,6 +377,9 @@ def data_source_bar() -> tuple[str, "pd.DataFrame"]:
     if choice == LIVE_ONLY:
         today = pd.Timestamp(event_log.now()).normalize()
         ev = log[log["time"] >= today] if len(log) else log
+        if len(ev) and ev["station"].notna().sum() == 0 and names:
+            st.caption("Today's events carry no train or station yet, so the map has nothing to place. Pick a dataset "
+                       "or Everything above to see located events, or choose a train and station when analysing a file.")
     elif choice == EVERYTHING:
         ev = log
     else:
@@ -1252,6 +1243,9 @@ def fleet_page() -> None:
         html(ui.section("Where events cluster"))
         weather = livemap.fetch_weather()
         agg = insight.station_events(ev, df)
+        if len(ev) and agg.empty and not df.empty:
+            html(ui.chip("unknown", "No located events in this selection",
+                         f"{len(ev)} event(s) match, none has a station · widen the range or choose a dataset with locations"))
         if df.empty:
             html(ui.empty("Station map unavailable", ["data/stations/AmendmenttoMP2014RailStation.geojson is missing."]))
         else:

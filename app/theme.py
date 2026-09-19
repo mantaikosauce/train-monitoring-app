@@ -13,13 +13,13 @@ from pathlib import Path
 
 TOKENS_PATH = (Path(__file__).resolve().parents[1]
                / "design-system" / "project" / "tokens.json")
-THEME = "dark"          # active theme; set_theme() switches it per run
+THEME = "light"         # the console is light only
 
 
 def set_theme(name: str) -> None:
-    """'light' or 'dark'. Called once per script run before anything draws."""
+    """Kept for callers; the console is light only."""
     global THEME
-    THEME = "light" if name == "light" else "dark"
+    THEME = "light"
 
 
 def map_style() -> str:
@@ -254,7 +254,7 @@ h1, h2, h3 {{ font-family: var(--font-sans); color: var(--ink-primary); letter-s
 .nw-hero-card .t {{ font-size:34px; line-height:38px; font-weight:600; letter-spacing:-.02em; margin:4px 0 6px; }}
 .nw-hero-card .s {{ font-size:15px; color:var(--ink-secondary); max-width:720px; }}
 .nw-hero-card .wx {{ text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--ink-secondary); line-height:1.5; }}
-.nw-hero-card .wx .e {{ display:inline-block; font-size:44px; line-height:1; filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); }}
+.nw-hero-card .wx .e {{ display:inline-block; font-size:44px; line-height:1; filter: drop-shadow(0 4px 10px rgba(16,21,28,.18)); }}
 .nw-hero-card .wx .big {{ font-size:26px; color:var(--ink-primary); font-weight:500; }}
 .nw-panel, .nw-kpi, .nw-card, .nw-sys, .nw-fleet, .nw-rank {{ background: color-mix(in srgb, var(--surface-card) 82%, transparent);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }}
